@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentdiode"
+version = "0.1.0"
+description = "Local-first AI agent status indicator for KDE Plasma"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "emreartz"}]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/emreartz/AgentDiode"
+Repository = "https://github.com/emreartz/AgentDiode"
+Issues = "https://github.com/emreartz/AgentDiode/issues"
+
+[project.optional-dependencies]
+tray = ["PySide6>=6.7"]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.6", "mypy>=1.11"]
+release = ["build>=1.2", "twine>=5"]
+
+[project.scripts]
+agentdiode = "agentdiode.cli:main"
+agentdiode-daemon = "agentdiode.daemon.server:main"
+agentdiode-tray = "agentdiode.tray.application:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+
+[tool.coverage.run]
+source = ["agentdiode"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

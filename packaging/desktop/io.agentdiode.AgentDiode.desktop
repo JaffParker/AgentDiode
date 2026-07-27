@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=AgentDiode
+Comment=AI coding agent status indicator
+Exec=agentdiode-tray
+Icon=io.agentdiode.AgentDiode
+Terminal=false
+Categories=Utility;
+StartupNotify=false

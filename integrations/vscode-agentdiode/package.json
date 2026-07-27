@@ -1,0 +1,57 @@
+{
+  "name": "agentdiode",
+  "displayName": "AgentDiode",
+  "description": "Privacy-safe bridge between VS Code agent lifecycle events and AgentDiode",
+  "version": "0.1.0",
+  "publisher": "agentdiode",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "onCommand:agentdiode.startSession",
+    "onCommand:agentdiode.completeSession",
+    "onCommand:agentdiode.failSession"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "agentdiode.startSession",
+        "title": "AgentDiode: Start Agent Session"
+      },
+      {
+        "command": "agentdiode.completeSession",
+        "title": "AgentDiode: Complete Agent Session"
+      },
+      {
+        "command": "agentdiode.failSession",
+        "title": "AgentDiode: Fail Agent Session"
+      },
+      {
+        "command": "agentdiode.showStatus",
+        "title": "AgentDiode: Show Integration Status"
+      }
+    ],
+    "configuration": {
+      "title": "AgentDiode",
+      "properties": {
+        "agentdiode.heartbeatSeconds": {
+          "type": "number",
+          "default": 30,
+          "minimum": 10,
+          "description": "Heartbeat interval for manually active sessions."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "check": "tsc --noEmit -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+"""Privacy-safe Claude Code lifecycle callback for AgentDiode."""
+
+from __future__ import annotations
+
+import json
+import os
+import socket
+import sys
+from datetime import datetime
+from pathlib import Path
+
+STATE_MAP = {
+    "SessionStart": "starting",
+    "UserPromptSubmit": "running",
+    "PreToolUse": "running",
+    "PostToolUse": "running",
+    "PostToolUseFailure": "running",
+    "PermissionRequest": "waiting_approval",
+    "Stop": "completed",
+    "SessionEnd": "idle",
+}
+
+
+def main() -> int:
+    try:
+        payload = json.load(sys.stdin)
+        event_name = payload["hook_event_name"]
+        if event_name == "Notification":
+            notification_type = str(payload.get("notification_type", ""))
+            state = (
+                "waiting_approval"
+                if "permission" in notification_type.lower()
+                else "waiting_input"
+            )
+        else:
+            state = STATE_MAP[event_name]
+        runtime = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}"))
+        target = Path(os.environ.get("AGENTDIODE_SOCKET", runtime / "agentdiode/agentdiode.sock"))
+        event = {
+            "protocol_version": 1,
+            "event": f"session.{state}",
+            "timestamp": datetime.now().astimezone().isoformat(),
+            "agent_id": "claude",
+            "agent_name": "Claude Code",
+            "session_id": payload["session_id"],
+            "cwd": payload.get("cwd", ""),
+            "reliability": "partial",
+            "source": "claude-official-hooks",
+            "metadata": {
+                "hook_event_name": event_name,
+                "notification_type": payload.get("notification_type"),
+                "permission_mode": payload.get("permission_mode"),
+                "tool_name": payload.get("tool_name"),
+                "model": payload.get("model"),
+            },
+        }
+        request = json.dumps({"command": "event", "payload": event}).encode() + b"\n"
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+            client.settimeout(1.5)
+            client.connect(str(target))
+            client.sendall(request)
+            client.recv(65536)
+    except (KeyError, ValueError, OSError, json.JSONDecodeError) as exc:
+        print(f"agentdiode Claude hook: {exc}", file=sys.stderr)
+    print("{}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
